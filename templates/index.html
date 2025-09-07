@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор фактов</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8; /* Светло-голубой фон */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2c3e50; /* Темно-синий */
+            margin-bottom: 24px;
+        }
+
+        #topicInput {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #topicInput:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        #getFactBtn {
+            background-color: #3498db; /* Ярко-синий */
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-bottom: 24px;
+        }
+
+        #getFactBtn:hover {
+            background-color: #2980b9; /* Более темный синий при наведении */
+            transform: translateY(-2px);
+        }
+
+        #getFactBtn:active {
+            transform: translateY(0);
+        }
+
+        #factText {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #555;
+            min-height: 54px; /* Резервируем место под 2-3 строки текста */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Случайный интересный факт на тему...</h1>
+        <input type="text" id="topicInput" placeholder="Введите тему (например, 'космос')">
+        <button id="getFactBtn">Получить факт</button>
+        <p id="factText">Нажмите кнопку, чтобы получить интересный факт.</p>
+    </div>
+
+    <script>
+        document.getElementById('getFactBtn').addEventListener('click', function() {
+            const factTextElement = document.getElementById('factText');
+            const topic = document.getElementById('topicInput').value;
+
+            factTextElement.textContent = 'Генерируем...'; // Сообщение на время загрузки
+
+            fetch('/generate-fact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ topic: topic })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        // Попробуем прочитать текст ошибки от сервера
+                        return response.text().then(text => { throw new Error(text || 'Ошибка сети или сервера') });
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    factTextElement.textContent = data;
+                })
+                .catch(error => {
+                    factTextElement.textContent = 'Ошибка: ' + error.message;
+                    console.error('Ошибка:', error);
+                })
+        });
+    </script>
+</body>
+</html>
